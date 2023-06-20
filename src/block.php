@@ -1,14 +1,11 @@
-<?php
-/**
- * Block template
- *
- * {COMMENT}
- */
-
-?>
-
-<div class="{CSS_CLASS}">
+{#
+  Block template
+  {COMMENT}
+  Description:
+  Icon:
+  Keywords: 
+  Enqueue Script:
+  Supports Anchor: false
+#}
 
 {FIELDS}
-
-</div>

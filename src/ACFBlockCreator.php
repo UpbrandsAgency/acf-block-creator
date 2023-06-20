@@ -217,55 +217,61 @@ class ACFBlockCreator extends Singleton {
 		$comment = [];
 
 		// Add @package comment.
-		if ( $this->config['package'] ) {
-			$package = $this->config['package'];
+		// if ( $this->config['package'] ) {
+		// 	$package = $this->config['package'];
 
-			if ( true === $package ) {
-				$package = get_bloginfo( 'name' );
-			}
+		// 	if ( true === $package ) {
+		// 		$package = get_bloginfo( 'name' );
+		// 	}
 
-			$comment[] = " * @package {$package}";
-		}
+		// 	$comment[] = " * @package {$package}";
+		// }
 
 		// Add @license comment.
-		if ( is_string( $this->config['license'] ) ) {
-			$comment[] = " * @license {$this->config['license']}";
-		}
+		// if ( is_string( $this->config['license'] ) ) {
+		// 	$comment[] = " * @license {$this->config['license']}";
+		// }
 
 		// Add empty line after package/license.
-		if ( $comment ) {
-			$comment[] = ' *';
-		}
+		// if ( $comment ) {
+		// 	$comment[] = ' *';
+		// }
 
 		$block_params = [
-			'Block Name' => $field_group['block_name'],
-			'Category'   => $field_group['block_category'],
-			'Align'      => $field_group['block_align'],
+			'Title' 		=> $field_group['block_name'],
+			'Category'	=> $field_group['block_category'],
+			'Align'			=> $field_group['block_align'],
 		];
 
 		foreach ( $block_params as $key => $value ) {
-			$comment[] = " * {$key}: $value";
+			if($key == 'Title') {
+				$comment[] = "{$key}: $value";
+			} else {
+				$comment[] = "	{$key}: $value";
+			}
 		}
 
 		// Create block template file.
 		$fields_markup = [];
-		foreach ( $field_group['fields'] as $field ) {
-			$fields_markup[] = $this->get_field_markup( $field );
-		}
+		// foreach ( $field_group['fields'] as $field ) {
+		// 	$fields_markup[] = $this->get_field_markup( $field );
+		// }
 
 		// Remove empty markup.
 		$fields_markup = array_filter( $fields_markup );
 
 		// Add inner blocks tag.
-		if ( $field_group['inner_blocks'] ) {
-			$fields_markup[] = '<InnerBlocks />';
-		}
+		// if ( $field_group['inner_blocks'] ) {
+		// 	$fields_markup[] = '<InnerBlocks />';
+		// }
 
 		$template = apply_filters(
 			'micropackage/acf-block-creator/block/template',
 			$this->package_fs->get_contents( 'block.php' ),
 			$field_group
 		);
+
+		$comment_xdebug = implode( "\n", $comment );
 
 		$template = str_replace(
 			[
@@ -274,7 +280,7 @@ class ACFBlockCreator extends Singleton {
 				'{CSS_CLASS}',
 			],
 			[
-				substr( implode( "\n", $comment ), 3 ),
+				implode( "\n", $comment ),
 				implode( "\n", $fields_markup ),
 				$field_group['block_container_class'],
 			],
@@ -289,7 +295,7 @@ class ACFBlockCreator extends Singleton {
 
 		$template_file = apply_filters(
 			'micropackage/acf-block-creator/block-template-file',
-			"{$slug}.php",
+			"{$slug}.twig",
 			$slug
 		);
 
@@ -372,7 +378,7 @@ class ACFBlockCreator extends Singleton {
 	public function enqueue_scripts() {
 		$home_path    = wp_normalize_path( get_home_path() );
 		$package_path = wp_normalize_path( dirname( dirname( __FILE__ ) ) );
-		$script_url   = site_url( str_replace( $home_path, '', $package_path ) . '/assets/js/acf-block-creator.js' );
+		$script_url   = WP_CONTENT_URL . '/themes/lumberjack/vendor/micropackage/acf-block-creator/assets/js/acf-block-creator.js';
 
 		wp_enqueue_script( 'acf-block-creator', $script_url, [ 'jquery' ], '1.0.0', true );
 	}
@@ -405,8 +411,12 @@ class ACFBlockCreator extends Singleton {
 		}
 
 		$markup_file = "fields/{$field['type']}.php";
-		$markup_file = $this->package_fs->exists( $markup_file ) ? $markup_file : 'fields/default.php';
-		$markup      = $this->package_fs->get_contents( $markup_file );
+		if( 'repeater' === $field['type'] ) {
+			$markup_file = $this->package_fs->exists( $markup_file ) ? $markup_file : 'fields/default.php';
+			$markup      = $this->package_fs->get_contents($markup_file);
+		} else {
+			$markup      = $this->package_fs->get_contents('fields/default.php');
+		}
 		$subfields   = [];
 
 		if ( 'repeater' === $field['type'] ) {
