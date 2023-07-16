@@ -378,7 +378,7 @@ class ACFBlockCreator extends Singleton {
 	public function enqueue_scripts() {
 		$home_path    = wp_normalize_path( get_home_path() );
 		$package_path = wp_normalize_path( dirname( dirname( __FILE__ ) ) );
-		$script_url   = WP_CONTENT_URL . '/themes/lumberjack/vendor/micropackage/acf-block-creator/assets/js/acf-block-creator.js';
+		$script_url   = WP_CONTENT_URL . '/themes/theme/vendor/micropackage/acf-block-creator/assets/js/acf-block-creator.js';
 
 		wp_enqueue_script( 'acf-block-creator', $script_url, [ 'jquery' ], '1.0.0', true );
 	}
